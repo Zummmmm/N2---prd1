@@ -1,7 +1,10 @@
 #include<stdio.h>
 #include<string.h>
+#include<stdlib.h>
 
 #define MAX 60
+#define ABRIGOS 3
+#define TAM 100
 
 typedef struct{
 
@@ -9,7 +12,7 @@ typedef struct{
     int tipo;
     int sexo;
     int idade;
-    char *tutor;
+    char tutor[TAM];
 }pet;
 
 void ler(pet *estrutura_pointer)
@@ -17,105 +20,119 @@ void ler(pet *estrutura_pointer)
     int op;
     printf("==Cadastrando pet==\n");
 
-    printf("Digite o tipo do pet:\n[0]gato\n[1]Cachorro porte pequeno\n[2]Cachorro porte médio\n[3]Cachorro porte grande\n!");
+    printf("Digite o tipo do pet:\n[0]gato\n[1]Cachorro porte pequeno\n[2]Cachorro porte médio\n[3]Cachorro porte grande\n");
     scanf("%d", &estrutura_pointer->tipo);
 
     printf("Digite o sexo do pet:\n[0]Fêmea\n[1]Macho\n");
     scanf("%d", &estrutura_pointer->sexo);
 
-    printf("Digite a idade do pet");
+    printf("Digite a idade do pet\n[0]Filhote\n[1]Adulto\n");
     scanf("%d", &estrutura_pointer->idade);
 
-    printf("O pet tem tutor?\n");
+    printf("O pet tem tutor?\n[0]Não\n[1]Sim\n");
     scanf("%d", &op);
 
     if(op == 0){
-        estrutura_pointer->tutor = "Vazio";
+        strcpy(estrutura_pointer->tutor, "Sem tutor");
     }
     else if(op == 1){
         printf("Digite o nome do tutor\n");
-        scanf(" %c", estrutura_pointer->tutor);
+        scanf(" %[^\n]", estrutura_pointer->tutor);
     }
 }
 
-int registrar(pet estrutura, pet *Dados_pointer[MAX][3], int *registro_por_abrigo[3])
+int registrar(pet estrutura, pet *Dados[MAX][3], int registro_por_abrigo[ABRIGOS], int *absolute_cod)
 {
     int abrigo, code, i, test = 0, j;
 
     printf("Em qual abrigo o pet será resgistado?:\n0 , 1 0 ou 2\n");
     scanf("%d", &abrigo);
+    
+    int indice = registro_por_abrigo[abrigo];
+    
+    if (abrigo < 0 || abrigo >= ABRIGOS) {
+        printf("Abrigo inválido.\n");
+        return 0;
+    }
 
-    if(*registro_por_abrigo[abrigo] >= 60){
+
+    if(registro_por_abrigo[abrigo] >= MAX){
         printf("Abrigo %d lotado!\n", abrigo);
         return 0;
     }
-    else if(*registro_por_abrigo[abrigo] < 60){
+    else if(registro_por_abrigo[abrigo] < MAX){
 
-        printf("Digite um Código não exitente para o pet\n");
-        scanf("%d", &code);
 
-        for(i = 0; i < 3; i++){
-            for(j = 0; j < *registro_por_abrigo[i]; j++){
+        code = *absolute_cod;
+    
+        printf("\nCadastrando pet de cod: %d...\n", code);
+        
+        
+        Dados[indice][abrigo] = malloc(sizeof(pet));
+        
+        
+        Dados[indice][abrigo]->cod = code;
+        Dados[indice][abrigo]->tipo = estrutura.tipo;
+        Dados[indice][abrigo]->sexo = estrutura.sexo;
+        Dados[indice][abrigo]->idade = estrutura.idade;
+        strcpy(Dados[indice][abrigo]->tutor, estrutura.tutor);
 
-                if(Dados_pointer[j][i]->cod == code){
-                    printf("Código já existe\n");
-                    test++;
-                }
-
-            }
+        (*absolute_cod)++;
         }
-    }
-        if(test == 0){
-        printf("Código aceito, cadastrando pet...\n");
-        Dados_pointer[*registro_por_abrigo[abrigo]][abrigo]->cod = estrutura.cod;
-        Dados_pointer[*registro_por_abrigo[abrigo]][abrigo]->tipo = estrutura.tipo;
-        Dados_pointer[*registro_por_abrigo[abrigo]][abrigo]->sexo = estrutura.sexo;
-        Dados_pointer[*registro_por_abrigo[abrigo]][abrigo]->idade = estrutura.idade;
-        Dados_pointer[*registro_por_abrigo[abrigo]][abrigo]->tutor = estrutura.tutor;
-
-        *registro_por_abrigo[abrigo]++;
-        }
-    }
-    printf("Cadastro do pet de cod: %d completo!\n", Dados_pointer[*registro_por_abrigo[abrigo]][abrigo]->cod);
-
+    
+    printf("\nCadastro do pet de cod: %d completo!\n", Dados[indice][abrigo]->cod);
+    registro_por_abrigo[abrigo]++;
 }
 
-void mostrar(pet *Dados[MAX][3],int *registro_por_abrigo[3])
+void mostrar(pet *Dados[MAX][ABRIGOS],int registro_por_abrigo[ABRIGOS])
 {
 	int i, j;
 	
-    for(i = 0; i < 3; i++;){
-     printf("Animais no abrigo %d:", i)
-      for(j = 0; j < *registro_por_abrigo[i];){
+    for(i = 0; i < ABRIGOS; i++){
+     printf("\nAnimais no abrigo %d:\n", i);
+      for(j = 0; j < registro_por_abrigo[i]; j++){
+          if(Dados[j][i] == NULL){
+              printf("Abrigo Vazio\n");
+              continue;
+          }
 
-        printf("Animal Código: %d\n", Dados[j][i].cod);
-        printf("Tipo: %d\n", *Dados[j][i].tipo);
-        printf("sexo: %d\n", *Dados[j][i.].sexo);
-        printf("idade: %d\n", *Dados[j][i.].idade);
-        printf("Tutor: %s\n", *Dados[j][i.].tutor);
+        printf(" \nPet de Código: %d\n", Dados[j][i]->cod);
+        printf(" Tipo: %s\n", 
+           (Dados[j][i]->tipo == 0) ? "Gato" :
+           (Dados[j][i]->tipo == 1) ? "Cachorro pequeno" :
+           (Dados[j][i]->tipo == 2) ? "Cachorro médio" :
+                                      "Cachorro Grande");
+        printf(" sexo: %s\n", 
+           (Dados[j][i]->sexo == 0) ? "Fêmea" :
+                                      "Macho");
+        printf(" idade: %s\n", 
+            (Dados[j][i]->idade == 0) ? "Filhote" :
+                                        "Adulto");
+        printf(" Tutor: %s\n", Dados[j][i]->tutor);
       }
     }
 }
 
 void main()
 {
-    pet Dados[MAX][3];
-    pet *Dados_pointer = &Dados;
-    int menu;
-	int registro_por_abrigo[3];
+    pet *Dados[MAX][ABRIGOS] = {NULL};
+	int registro_por_abrigo[ABRIGOS] ={0};
+    int absolute_cod = 0;
     pet estrutura;
-    pet *estrutura_pointer = &estrutura;
+    int menu;
 
-    printf("==MENU==\n");
-    printf("[1]Cadastrar pet\n");
-    scanf("%d", &menu);
+    while(menu != 5){
+     printf("==MENU==\n");
+     printf("[1]Cadastrar pet\n");
+     scanf("%d", &menu);
 
-    switch(menu){
+     switch(menu){
 
-        case 1:
-         ler(estrutura_pointer);
-         registrar(estrutura, Dados_pointer, registro_por_abrigo);
-         mostrar(Dados, registro_por_abrigo);
+         case 1:
+          ler(&estrutura);
+          registrar(estrutura, Dados, registro_por_abrigo, &absolute_cod);
+          mostrar(Dados, registro_por_abrigo);
+     }
     }
 
 }
